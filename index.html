@@ -1,0 +1,1136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Life Helper Toolkit — Upgraded</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#071220;
+    --card:#0b1220;
+    --muted:#9aa6b2;
+    --accent:#6ee7b7;
+    --accent-2:#60a5fa;
+    --glass: rgba(255,255,255,0.03);
+    --radius:14px;
+    --glass-strong: rgba(255,255,255,0.04);
+    --success: #2dd4bf;
+    --danger: #fb7185;
+    --shadow: 0 10px 30px rgba(2,6,23,0.6);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;padding:18px 14px;background:linear-gradient(180deg,#061126 0%, #071220 100%);
+    color:#e6f0f2;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+    display:flex;align-items:flex-start;justify-content:center;
+  }
+  .app{
+    width:100%;max-width:880px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:18px;padding:14px;box-shadow:var(--shadow);backdrop-filter: blur(8px);
+    overflow:hidden;
+  }
+  header{display:flex;align-items:center;gap:12px;padding:8px 6px}
+  .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#02201b;font-size:18px;box-shadow:0 6px 16px rgba(7,18,32,0.6)}
+  h1{font-size:18px;margin:0}
+  p.lead{margin:0;color:var(--muted);font-size:13px}
+  .top-row{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:6px}
+  .left{display:flex;gap:12px;align-items:center}
+  .tabs{display:flex;gap:8px;padding:8px 6px;overflow:auto}
+  .tab{
+    background:var(--glass);padding:8px 12px;border-radius:12px;font-weight:600;font-size:14px;color:var(--muted);
+    cursor:pointer;white-space:nowrap;flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;
+  }
+  .tab.active{background:linear-gradient(90deg, rgba(110,231,183,0.12), rgba(96,165,250,0.08));color:var(--accent);box-shadow:0 6px 18px rgba(42,58,80,0.3)}
+  .panel{padding:12px;margin-top:6px}
+  .card{background:rgba(255,255,255,0.02);border-radius:12px;padding:12px;margin-bottom:10px}
+  /* grid layout for main content */
+  .grid{display:grid;grid-template-columns:1fr;gap:10px}
+  @media(min-width:880px){ .grid{grid-template-columns:1fr 360px} }
+
+  /* Timer / Stopwatch big display */
+  .big-display{font-size:36px;font-weight:800;text-align:center;padding:18px 6px}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .btn{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;font-weight:700}
+  .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#02201b}
+  .btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,0.03);color:var(--muted)}
+  .muted{color:var(--muted);font-size:13px}
+  .muted-2{color:#8ea0ab;font-size:12px}
+
+  /* inputs */
+  .row{display:flex;gap:8px;align-items:center}
+  input[type=text], input[type=number], textarea, select{background:transparent;border:1px solid rgba(255,255,255,0.03);padding:10px;border-radius:10px;color:inherit;outline:none;font-size:14px}
+  textarea{min-height:72px}
+  .small{padding:6px 8px;font-size:13px}
+
+  /* todo */
+  .todo-list{display:flex;flex-direction:column;gap:8px}
+  .todo-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(0,0,0,0.06), rgba(255,255,255,0.01));}
+  .todo-item .text{flex:1}
+  .todo-item.completed .text{text-decoration:line-through;opacity:0.6}
+  .tag{padding:4px 8px;border-radius:999px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);font-size:12px}
+
+  /* picker */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;padding-top:8px}
+  .chip{padding:8px 10px;border-radius:999px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+
+  /* mood */
+  .mood-row{display:flex;gap:8px;justify-content:center}
+  .mood{font-size:26px;padding:10px;border-radius:12px;cursor:pointer}
+  .mood.selected{transform:scale(1.12);box-shadow:0 8px 24px rgba(2,6,23,0.6)}
+  footer{padding:10px 6px;text-align:center;color:var(--muted);font-size:13px}
+
+  /* extra panels */
+  .side-card{position:relative;overflow:hidden}
+  .stat{display:flex;align-items:center;justify-content:space-between;padding:8px 6px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));margin-bottom:8px}
+  .small-muted{font-size:12px;color:var(--muted)}
+  .preset{padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);cursor:pointer;border:1px solid rgba(255,255,255,0.03)}
+  .badge{display:inline-block;padding:6px 8px;border-radius:999px;background:linear-gradient(90deg,#ffd966,#ff9a9e);color:#062226;font-weight:700;font-size:12px}
+
+  /* floating mini timer */
+  .mini-timer{position:fixed;bottom:18px;right:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:10px;border-radius:12px;box-shadow:0 10px 30px rgba(3,9,20,0.5);display:flex;gap:8px;align-items:center;z-index:999}
+  .pill{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);font-weight:700}
+
+  /* command palette */
+  .cmd-palette{position:fixed;left:50%;top:20%;transform:translateX(-50%);width:min(720px,92%);background:rgba(6,9,18,0.95);border-radius:12px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,0.6);z-index:1200;display:none;flex-direction:column;gap:8px}
+  .cmd-input{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px;border-radius:8px;color:inherit;font-size:16px;outline:none}
+  .cmd-list{max-height:220px;overflow:auto;padding-top:6px}
+  .cmd-item{padding:8px;border-radius:8px;cursor:pointer}
+  .cmd-item:hover,.cmd-item.active{background:rgba(255,255,255,0.02)}
+
+  /* snackbar */
+  .snackbar{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:rgba(2,6,23,0.9);color:#e6f0f2;padding:10px 14px;border-radius:999px;display:flex;gap:8px;align-items:center;box-shadow:0 8px 30px rgba(0,0,0,0.6);z-index:1300;display:none}
+  .snackbar button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:6px 8px;border-radius:8px;color:inherit;cursor:pointer}
+
+  /* analytics sparkline */
+  .sparkline{width:100%;height:42px}
+  .analytics-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+
+  /* animations */
+  .glow{
+    box-shadow:0 10px 30px rgba(96,165,250,0.06), 0 4px 12px rgba(110,231,183,0.04);
+  }
+
+  /* reduced motion */
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none!important}
+  }
+
+  /* helpers */
+  .muted-block{color:var(--muted);font-size:12px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.01)}
+  .row-wrap{display:flex;flex-wrap:wrap;gap:8px}
+</style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Life Helper Toolkit">
+    <header>
+      <div class="logo">LH</div>
+      <div style="flex:1">
+        <h1>Life Helper Toolkit</h1>
+        <p class="lead">Pomodoro, To-Do, Mood & Habits — private, friendly, and beautiful.</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn" id="export-btn" title="Export data">Export</button>
+        <button class="btn ghost" id="import-btn" title="Import data">Import</button>
+      </div>
+    </header>
+
+    <div class="top-row">
+      <div class="left">
+        <nav class="tabs" role="tablist" aria-label="Features">
+          <div class="tab active" data-panel="timer">Timer</div>
+          <div class="tab" data-panel="stopwatch">Stopwatch</div>
+          <div class="tab" data-panel="todo">To-Do</div>
+          <div class="tab" data-panel="picker">Random Picker</div>
+          <div class="tab" data-panel="mood">Mood</div>
+          <div class="tab" data-panel="habit">Habits</div>
+        </nav>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="theme" class="small" title="Theme">
+          <option value="mint">Mint</option>
+          <option value="coral">Coral</option>
+          <option value="night">Night</option>
+          <option value="soft">Soft</option>
+        </select>
+        <button class="btn ghost" id="help">?</button>
+      </div>
+    </div>
+
+    <main class="panel grid" id="main-grid">
+      <section style="min-width:260px">
+        <!-- TIMER -->
+        <div id="timer" class="card panel-item" aria-hidden="false">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div>
+              <strong>Pomodoro & Timer</strong>
+              <div class="muted">Auto cycles, presets, auto long-break</div>
+            </div>
+            <div class="muted-2">Focus Mode</div>
+          </div>
+
+          <div class="big-display" id="timer-display" aria-live="polite">00:25:00</div>
+
+          <div class="card" style="display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="t-min" type="number" min="0" placeholder="min" style="width:86px">
+              <input id="t-sec" type="number" min="0" max="59" placeholder="sec" style="width:86px">
+              <button class="btn" id="t-set">Set</button>
+              <select id="cycle-mode" class="small" title="Cycle mode">
+                <option value="none">No cycle</option>
+                <option value="pomodoro" selected>Pomodoro (25/5)</option>
+                <option value="custom">Custom cycle</option>
+              </select>
+            </div>
+
+            <div style="display:flex;gap:8px;align-items:center">
+              <button class="btn primary" id="t-start">Start</button>
+              <button class="btn" id="t-pause">Pause</button>
+              <button class="btn ghost" id="t-reset">Reset</button>
+            </div>
+          </div>
+
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div class="preset" data-min="25" data-sec="0">Study 25/5</div>
+            <div class="preset" data-min="50" data-sec="0">Sprint 50/10</div>
+            <div class="preset" data-min="15" data-sec="0">Quick 15</div>
+            <div class="preset" data-min="90" data-sec="0">Deep 90</div>
+
+            <!-- NEW: Cycle manager summary -->
+            <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+              <div class="muted-2">Cycle: <span id="cycle-current">0</span>/<span id="cycle-target">4</span></div>
+              <button class="btn small" id="edit-cycle">Edit</button>
+            </div>
+            <div style="display:none" id="cycle-editor">
+              <!-- displayed by script when custom chosen -->
+            </div>
+          </div>
+        </div>
+
+        <!-- STOPWATCH -->
+        <div id="stopwatch" class="card panel-item" aria-hidden="true" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong>Stopwatch</strong>
+            <div class="muted">Laps are saved locally</div>
+          </div>
+          <div class="big-display" id="sw-display">00:00.00</div>
+          <div class="controls">
+            <button class="btn primary" id="sw-start">Start</button>
+            <button class="btn" id="sw-lap">Lap</button>
+            <button class="btn ghost" id="sw-stop">Stop</button>
+            <button class="btn" id="sw-reset">Reset</button>
+          </div>
+          <div class="card" style="margin-top:12px">
+            <strong>Laps</strong>
+            <div id="sw-laps" style="margin-top:8px;display:flex;flex-direction:column;gap:6px"></div>
+          </div>
+        </div>
+
+        <!-- TODO -->
+        <div id="todo" class="card panel-item" aria-hidden="true" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div>
+              <strong>To-Do & Projects</strong>
+              <div class="muted">Apps for students, parents, freelancers</div>
+            </div>
+            <div class="small-muted">Completed: <span id="stat-tasks">0</span></div>
+          </div>
+
+          <div class="row" style="gap:8px;">
+            <input id="todo-input" type="text" placeholder="Add a task e.g. 'Math worksheet'" style="flex:1">
+            <select id="todo-project" class="small">
+              <option value="inbox">Inbox</option>
+              <option value="school">School</option>
+              <option value="work">Work</option>
+              <option value="home">Home</option>
+            </select>
+            <button class="btn primary" id="todo-add">Add</button>
+          </div>
+
+          <div style="height:8px"></div>
+
+          <div class="row-wrap" style="margin-bottom:8px">
+            <button class="btn ghost" id="filter-all">All</button>
+            <button class="btn ghost" id="filter-pending">Pending</button>
+            <button class="btn ghost" id="filter-done">Done</button>
+            <button class="btn ghost" id="clear-done">Clear done</button>
+            <button class="btn ghost" id="export-tasks">Export tasks</button>
+          </div>
+
+          <div class="todo-list" id="todo-list" aria-live="polite"></div>
+        </div>
+
+        <!-- PICKER -->
+        <div id="picker" class="card panel-item" aria-hidden="true" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <strong>Random Picker</strong>
+            <div class="muted">Weighted picks & history</div>
+          </div>
+
+          <div class="row" style="gap:8px;margin-bottom:8px">
+            <input id="picker-input" type="text" placeholder="Option text">
+            <input id="picker-weight" type="number" min="1" max="5" placeholder="weight" style="width:86px">
+            <button class="btn" id="picker-add">Add</button>
+            <button class="btn ghost" id="picker-clear">Clear</button>
+          </div>
+
+          <div id="picker-chips" class="chips"></div>
+          <div style="height:8px"></div>
+          <div class="controls">
+            <button class="btn primary" id="picker-run">Pick Random</button>
+            <div id="picker-result" style="min-width:160px;text-align:center;font-weight:700"></div>
+          </div>
+          <div style="margin-top:8px" class="muted-2">History: <span id="picker-history-count">0</span></div>
+        </div>
+
+        <!-- MOOD -->
+        <div id="mood" class="card panel-item" aria-hidden="true" style="display:none">
+          <div style="text-align:center;margin-bottom:8px;color:var(--muted)"><strong>How are you feeling?</strong> Tap a mood and add a short note</div>
+          <div class="mood-row">
+            <div class="mood" data-mood="happy">😄</div>
+            <div class="mood" data-mood="ok">🙂</div>
+            <div class="mood" data-mood="tired">😴</div>
+            <div class="mood" data-mood="sad">😕</div>
+            <div class="mood" data-mood="angry">😠</div>
+          </div>
+
+          <div style="height:12px"></div>
+          <div class="card">
+            <strong>History</strong>
+            <div id="mood-history" style="margin-top:8px;display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+        </div>
+
+        <!-- HABIT -->
+        <div id="habit" class="card panel-item" aria-hidden="true" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><strong>Habits</strong><div class="muted">Daily habits, streaks & badges</div></div>
+            <div class="small-muted">Streak: <span id="habit-streak">0</span></div>
+          </div>
+
+          <div style="margin-top:8px" class="row">
+            <input id="habit-input" type="text" placeholder="e.g. Read 20 minutes" style="flex:1">
+            <button class="btn primary" id="habit-add">Add</button>
+          </div>
+          <div style="height:8px"></div>
+          <div id="habit-list"></div>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN / STATS & CONTROLS -->
+      <aside class="side-card">
+        <div class="card">
+          <strong>Today</strong>
+          <div class="stat">
+            <div>
+              <div class="small-muted">Focus minutes</div>
+              <div id="stat-minutes" style="font-weight:800">0</div>
+            </div>
+            <div>
+              <div class="small-muted">Badges</div>
+              <div id="badges"><span class="badge">Welcome</span></div>
+            </div>
+          </div>
+
+          <div style="margin-top:8px" class="muted-block small-muted">Quick templates</div>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+            <div class="preset" data-min="25" data-sec="0">Study 25</div>
+            <div class="preset" data-min="45" data-sec="0">Focus 45</div>
+            <div class="preset" data-min="10" data-sec="0">Quick 10</div>
+          </div>
+
+          <div style="height:12px"></div>
+          <div class="muted-block small-muted">Mini actions</div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn" id="start-mini">Start Mini</button>
+            <button class="btn ghost" id="clear-all">Erase All</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:10px">
+          <strong>Backup & Share</strong>
+          <div class="muted-2" style="margin-top:6px">
+            Export data, create a share snapshot or restore.
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn" id="export-full">Export All</button>
+            <button class="btn ghost" id="make-snapshot">Share</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:10px">
+          <strong>Settings</strong>
+          <div style="margin-top:8px" class="muted-2">Notifications, haptics & privacy</div>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+            <button class="btn" id="notif-perm">Notifications</button>
+            <button class="btn" id="sound-toggle">Sound: On</button>
+            <button class="btn ghost" id="erase-local">Erase</button>
+          </div>
+        </div>
+
+        <!-- NEW: Analytics -->
+        <div class="card" style="margin-top:10px">
+          <strong>Analytics</strong>
+          <div class="muted-2" style="margin-top:6px">Focus last 7 days</div>
+          <div style="margin-top:8px" class="analytics-row">
+            <svg id="sparkline" class="sparkline" viewBox="0 0 140 42" preserveAspectRatio="none"></svg>
+            <div style="text-align:right">
+              <div class="small-muted">7-day</div>
+              <div id="spark-total" style="font-weight:800">0m</div>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+    </main>
+
+    <footer>Saved locally • Mobile-first • No servers</footer>
+
+    <!-- floating mini timer -->
+    <div class="mini-timer" id="mini-timer" style="display:none" role="region" aria-label="Mini timer">
+      <div id="mini-display" class="pill">00:00:00</div>
+      <div>
+        <button class="btn small" id="mini-pause">Pause</button>
+        <button class="btn small" id="mini-stop">Stop</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Command palette -->
+  <div class="cmd-palette" id="cmd-palette" role="dialog" aria-label="Command palette">
+    <input id="cmd-input" class="cmd-input" placeholder="Type a command (e.g. 'start 25', 'add todo', 'toggle sound')" />
+    <div class="cmd-list" id="cmd-list" role="list"></div>
+  </div>
+
+  <!-- Snackbar / Undo -->
+  <div class="snackbar" id="undo-snackbar">
+    <div id="undo-text">Action</div>
+    <button id="undo-btn">Undo</button>
+    <button id="undo-close">Close</button>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+/* =========================
+   App data & helpers
+   ========================= */
+const STORAGE_KEY = 'lifehelper.v2';
+let state = {
+  timer: { remaining: 25*60, running:false, mode:'pomodoro', sessions:0, minutesToday:0, sessionLength:0, cycleTarget:4, cycleCurrent:0, shortBreak:5*60, longBreak:15*60 },
+  stopwatch: { elapsed:0 },
+  todos: [],
+  picker: { items: [], history: [] },
+  mood: [],
+  habits: [],
+  badges: ['Welcome'],
+  settings: { sound:true, theme:'mint', notif:false },
+  stats: { totalMinutes:0, lastFocusDate: null, history: [] }, // history: [{date:'2025-11-07', minutes:30}, ...]
+  _undoStack: []
+};
+
+// tiny utils
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+function nowISO(){ return new Date().toISOString(); }
+function dateKey(d=new Date()){ return d.toISOString().slice(0,10); }
+function save(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){} }
+function load(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) {
+      const parsed = JSON.parse(raw);
+      // merge safely
+      state = Object.assign(state, parsed);
+    }
+  } catch(e){}
+}
+load();
+
+/* =========================
+   Theme
+   ========================= */
+const themeSelect = $('#theme');
+function applyTheme(name){
+  document.documentElement.style.setProperty('--accent', name==='coral' ? '#ff9aa2' : name==='night' ? '#8892ff' : name==='soft' ? '#ffd6a5' : '#6ee7b7');
+  document.documentElement.style.setProperty('--accent-2', name==='coral' ? '#ffb3b3' : name==='night' ? '#60a5fa' : name==='soft' ? '#a0e9ff' : '#60a5fa');
+  state.settings.theme = name; save();
+}
+if(themeSelect) {
+  themeSelect.value = state.settings.theme || 'mint';
+  applyTheme(themeSelect.value);
+  themeSelect.addEventListener('change', ()=> applyTheme(themeSelect.value));
+}
+
+/* =========================
+   Tabs
+   ========================= */
+$$('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    $$('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const panel = tab.dataset.panel;
+    $$('.panel-item').forEach(p=>{
+      if(p.id===panel){
+        p.style.display=''; p.setAttribute('aria-hidden','false');
+      } else {
+        p.style.display='none'; p.setAttribute('aria-hidden','true');
+      }
+    });
+  });
+});
+
+/* =========================
+   Utility: audio & confetti
+   ========================= */
+let audioCtx=null;
+function beep(freq=880,dur=0.12){
+  if(!state.settings.sound) return;
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type='sine'; o.frequency.value = freq;
+    g.gain.value = 0.02;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); g.gain.setValueAtTime(0.02, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+    o.stop(audioCtx.currentTime + dur);
+  }catch(e){}
+}
+function confettiBrief(){
+  const el = document.createElement('div'); el.style.position='fixed'; el.style.left='0'; el.style.top='0'; el.style.width='100%';
+  el.style.height='100%'; el.style.pointerEvents='none';
+  const fragments = [];
+  const em = ['🎉','✨','💪','🔥'];
+  for(let i=0;i<12;i++){
+    const f = document.createElement('div'); f.textContent = em[Math.floor(Math.random()*em.length)];
+    f.style.position='absolute'; f.style.left = Math.random()*100+'%';
+    f.style.top = Math.random()*20+'%'; f.style.fontSize = (12+Math.random()*26)+'px';
+    f.style.opacity = '0.95'; f.style.transform = 'translateY(0) rotate('+ (Math.random()*180-90) +'deg)';
+    f.style.transition = 'transform 900ms cubic-bezier(.2,.8,.2,1), opacity 900ms';
+    el.appendChild(f); fragments.push(f);
+  }
+  document.body.appendChild(el);
+  requestAnimationFrame(()=> {
+    fragments.forEach((f,i)=>{
+      setTimeout(()=> {
+        f.style.transform = 'translateY(110vh) rotate('+ (Math.random()*720-360) +'deg)';
+        f.style.opacity = '0';
+      }, i*40);
+    });
+    setTimeout(()=> el.remove(), 1100);
+  });
+}
+
+/* =========================
+   Notifications & vibration
+   ========================= */
+async function ensureNotifications(){
+  if(!('Notification' in window)) return false;
+  if(Notification.permission === 'granted'){ state.settings.notif = true; save(); return true; }
+  if(Notification.permission !== 'denied'){
+    const r = await Notification.requestPermission();
+    state.settings.notif = (r==='granted');
+    save();
+    return state.settings.notif;
+  }
+  return false;
+}
+if($('#notif-perm')) {
+  $('#notif-perm').addEventListener('click', ()=> {
+    ensureNotifications().then(ok=>{
+      alert(ok ? 'Notifications enabled' : 'Notifications unavailable or denied');
+    });
+  });
+}
+
+/* =========================
+   Undo / Snackbar
+   ========================= */
+const snackbar = $('#undo-snackbar');
+let undoTimeout = null;
+function pushUndo(action){
+  state._undoStack = state._undoStack || [];
+  state._undoStack.push(action);
+  if($('#undo-text')) $('#undo-text').textContent = action.label || 'Action performed';
+  if(snackbar) snackbar.style.display = 'flex';
+  clearTimeout(undoTimeout);
+  undoTimeout = setTimeout(()=> {
+    if(snackbar) snackbar.style.display = 'none';
+    state._undoStack.shift();
+    save();
+  }, 5000);
+}
+if($('#undo-btn')) {
+  $('#undo-btn').addEventListener('click', ()=> {
+    const act = state._undoStack.pop();
+    if(!act){ if(snackbar) snackbar.style.display='none'; return; }
+    if(act.type === 'delete-todo'){
+      state.todos.splice(act.index||0,0,act.item);
+      save(); renderTodos(); updateStatsUI();
+    } else if(act.type === 'clear-done'){
+      state.todos = (act.prev || []).slice();
+      save(); renderTodos(); updateStatsUI();
+    } else if(act.type === 'clear-all'){
+      state = Object.assign({}, act.prevState);
+      save(); location.reload();
+      return;
+    }
+    if(snackbar) snackbar.style.display = 'none';
+  });
+}
+if($('#undo-close')) $('#undo-close').addEventListener('click', ()=> { if(snackbar) snackbar.style.display='none'; });
+
+/* =========================
+   Timer & Pomodoro cycles (enhanced)
+   ========================= */
+let timerInterval = null;
+function formatHMSS(sec){
+  const h = Math.floor(sec/3600);
+  const m = Math.floor((sec%3600)/60);
+  const s = Math.floor(sec%60);
+  if(h>0) return String(h).padStart(2,'0')+":"+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0');
+  return String(m).padStart(2,'0')+":"+String(s).padStart(2,'0');
+}
+function safeSet(selector, text){
+  const el = $(selector);
+  if(el) el.textContent = text;
+}
+function renderTimer(){
+  safeSet('#timer-display', formatHMSS(state.timer.remaining));
+  safeSet('#mini-display', formatHMSS(state.timer.remaining));
+  safeSet('#cycle-current', String(state.timer.cycleCurrent || 0));
+  safeSet('#cycle-target', String(state.timer.cycleTarget || 4));
+}
+
+renderTimer();
+
+function recordFocusMinutes(mins){
+  if(!Number.isFinite(mins) || mins<=0) return;
+  const key = dateKey();
+  state.stats.history = state.stats.history || [];
+  const found = state.stats.history.find(h => h.date === key);
+  if(found) found.minutes = (found.minutes || 0) + mins;
+  else state.stats.history.push({date:key, minutes:mins});
+  state.stats.history = state.stats.history.slice(-30);
+  state.stats.totalMinutes = (state.stats.totalMinutes || 0) + mins;
+  save();
+  renderSparkline();
+  updateStatsUI();
+}
+
+function startTimer(){
+  if(state.timer.running) return;
+  state.timer.running = true;
+  state.timer.sessionLength = state.timer.remaining;
+  const target = Date.now() + state.timer.remaining*1000;
+  timerInterval = setInterval(()=>{
+    const left = Math.max(0, Math.ceil((target - Date.now())/1000));
+    state.timer.remaining = left;
+    renderTimer();
+    if(left<=0){
+      clearInterval(timerInterval); timerInterval=null; state.timer.running=false;
+      state.timer.sessions = (state.timer.sessions||0)+1;
+      if(!state.badges.includes('First session')) state.badges.push('First session');
+      const minutes = Math.max(1, Math.round((state.timer.sessionLength || 0)/60));
+      recordFocusMinutes(minutes);
+      if(state.timer.mode === 'pomodoro'){
+        state.timer.cycleCurrent = (state.timer.cycleCurrent || 0) + 1;
+        if(state.timer.cycleCurrent >= (state.timer.cycleTarget || 4)){
+          state.timer.cycleCurrent = 0;
+          state.timer.remaining = state.timer.longBreak || 15*60;
+        } else {
+          state.timer.remaining = state.timer.shortBreak || 5*60;
+        }
+      } else {
+        state.timer.remaining = 25*60;
+      }
+      save();
+      beep(880,0.2);
+      navigator.vibrate?.(300);
+      if(state.settings.notif) new Notification('Time’s up!', {body:'Session finished — take a break or continue.'});
+      confettiBrief();
+      renderTimer();
+      updateStatsUI();
+    }
+  },200);
+  save();
+}
+
+function pauseTimer(){ if(timerInterval){ clearInterval(timerInterval); timerInterval=null; } state.timer.running=false; save(); }
+
+function resetTimer(){ pauseTimer(); state.timer.remaining = 25*60; renderTimer(); save(); }
+
+if($('#t-start')) $('#t-start').addEventListener('click', ()=> { startTimer(); });
+if($('#t-pause')) $('#t-pause').addEventListener('click', ()=> { pauseTimer(); });
+if($('#t-reset')) $('#t-reset').addEventListener('click', ()=> { resetTimer(); });
+
+if($('#t-set')) $('#t-set').addEventListener('click', ()=> {
+  const m = parseInt($('#t-min').value||'0',10) || 0;
+  const s = parseInt($('#t-sec').value||'0',10) || 0;
+  const tot = Math.max(0, m*60 + s);
+  if(tot>0){ state.timer.remaining = tot; renderTimer(); save(); }
+});
+
+$$('.preset').forEach(p=>{
+  p.addEventListener('click', ()=> {
+    const m = parseInt(p.dataset.min||'25',10);
+    const s = parseInt(p.dataset.sec||'0',10);
+    state.timer.remaining = m*60 + s;
+    state.timer.mode = 'pomodoro';
+    renderTimer(); save();
+  });
+});
+
+/* Cycle editor UI */
+if($('#edit-cycle')) {
+  $('#edit-cycle').addEventListener('click', ()=> {
+    const dlg = document.createElement('div');
+    dlg.style.position='fixed'; dlg.style.left='50%'; dlg.style.top='50%'; dlg.style.transform='translate(-50%,-50%)';
+    dlg.style.background='rgba(6,9,18,0.96)'; dlg.style.padding='12px'; dlg.style.borderRadius='12px'; dlg.style.zIndex='1400';
+    dlg.innerHTML = `
+      <div style="font-weight:700;margin-bottom:8px">Cycle Settings</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <label style="color:var(--muted)">Pomodoros before long break</label>
+        <input id="cycle-count" type="number" min="1" value="${state.timer.cycleTarget||4}" style="width:80px;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.03)"/>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <label style="color:var(--muted)">Short break (min)</label>
+        <input id="short-min" type="number" min="1" value="${Math.round((state.timer.shortBreak||300)/60)}" style="width:80px;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.03)"/>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <label style="color:var(--muted)">Long break (min)</label>
+        <input id="long-min" type="number" min="1" value="${Math.round((state.timer.longBreak||900)/60)}" style="width:80px;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.03)"/>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button id="cycle-save" class="btn primary">Save</button>
+        <button id="cycle-cancel" class="btn ghost">Cancel</button>
+      </div>
+    `;
+    document.body.appendChild(dlg);
+    $('#cycle-cancel').addEventListener('click', ()=> dlg.remove());
+    $('#cycle-save').addEventListener('click', ()=> {
+      const cnt = Math.max(1, parseInt($('#cycle-count').value||'4',10));
+      const shortMin = Math.max(1, parseInt($('#short-min').value||'5',10));
+      const longMin = Math.max(1, parseInt($('#long-min').value||'15',10));
+      state.timer.cycleTarget = cnt;
+      state.timer.shortBreak = shortMin * 60;
+      state.timer.longBreak = longMin * 60;
+      save(); renderTimer();
+      dlg.remove();
+    });
+  });
+}
+
+/* =========================
+   Mini timer controls
+   ========================= */
+if($('#start-mini')) $('#start-mini').addEventListener('click', ()=>{
+  $('#mini-timer').style.display='';
+  state.timer.remaining = 10*60; renderTimer(); save(); startTimer();
+  $('#mini-display').textContent = formatHMSS(state.timer.remaining);
+});
+if($('#mini-pause')) $('#mini-pause').addEventListener('click', ()=> pauseTimer());
+if($('#mini-stop')) $('#mini-stop').addEventListener('click', ()=> { resetTimer(); $('#mini-timer').style.display='none'; });
+
+/* =========================
+   Stopwatch
+   ========================= */
+let swInterval=null, swRunning=false, swStart=0, swElapsed = state.stopwatch.elapsed || 0;
+const swDisplay = $('#sw-display');
+function formatStopwatch(ms){
+  const total = Math.floor(ms); const s = Math.floor(total/1000); const msLeft = Math.floor((total%1000)/10);
+  const mm = Math.floor(s/60); const ss = s%60;
+  return String(mm).padStart(2,'0')+":"+String(ss).padStart(2,'0')+"."+String(msLeft).padStart(2,'0');
+}
+function swRender(){ if(swDisplay) swDisplay.textContent = formatStopwatch(swElapsed); }
+swRender();
+
+function swStartFn(){ if(swRunning) return; swRunning=true; swStart = Date.now() - swElapsed; swInterval = setInterval(()=>{ swElapsed = Date.now() - swStart; swRender(); },50); }
+function swStopFn(){ if(!swRunning) return; swRunning=false; clearInterval(swInterval); swInterval=null; state.stopwatch.elapsed = swElapsed; save(); }
+function swReset(){ swStopFn(); swElapsed = 0; state.stopwatch.elapsed = 0; swRender(); if($('#sw-laps')) $('#sw-laps').innerHTML=''; save(); }
+
+function addLap(){ if(swElapsed<=0) return; const container = $('#sw-laps'); if(!container) return; const el = document.createElement('div'); el.textContent = formatStopwatch(swElapsed); el.style.padding='6px 8px'; el.style.borderRadius='8px'; el.style.background='rgba(255,255,255,0.02)'; container.prepend(el); save(); }
+
+if($('#sw-start')) {
+  $('#sw-start').addEventListener('click', ()=>{
+    if(swRunning){ swStopFn(); $('#sw-start').textContent='Start'; } else { swStartFn(); $('#sw-start').textContent='Pause'; }
+  });
+}
+if($('#sw-lap')) $('#sw-lap').addEventListener('click', addLap);
+if($('#sw-stop')) $('#sw-stop').addEventListener('click', ()=>{ swStopFn(); if($('#sw-start')) $('#sw-start').textContent='Start'; });
+if($('#sw-reset')) $('#sw-reset').addEventListener('click', ()=>{ swReset(); if($('#sw-start')) $('#sw-start').textContent='Start'; });
+
+/* =========================
+   Todos with projects & drag reorder (enhanced with undo)
+   ========================= */
+let filterMode = 'all';
+const todoList = $('#todo-list');
+function renderTodos(){
+  if(!todoList) return;
+  todoList.innerHTML='';
+  const arr = state.todos.filter(t=>{
+    if(filterMode==='pending') return !t.done;
+    if(filterMode==='done') return t.done;
+    return true;
+  });
+  arr.forEach((t,idx)=>{
+    const item = document.createElement('div'); item.className = 'todo-item' + (t.done ? ' completed' : '');
+    item.draggable = true;
+    item.dataset.index = idx;
+    const chk = document.createElement('input'); chk.type='checkbox'; chk.checked = t.done;
+    chk.addEventListener('change', ()=>{
+      t.done = chk.checked; save(); renderTodos(); updateStatsUI();
+    });
+    const content = document.createElement('div'); content.className='text';
+    const title = document.createElement('div'); title.textContent = t.text; title.style.fontWeight='600';
+    const meta = document.createElement('div'); meta.className='muted-2'; meta.style.fontSize='12px'; meta.textContent = (t.project ? t.project+' • ' : '') + (t.due ? ('Due '+t.due) : '');
+    content.appendChild(title); if(t.note) { const note = document.createElement('div'); note.textContent=t.note; note.style.fontSize='13px'; note.style.color='var(--muted)'; content.appendChild(note); }
+    content.appendChild(meta);
+    const right = document.createElement('div'); right.style.display='flex'; right.style.gap='6px'; right.style.alignItems='center';
+    const edit = document.createElement('button'); edit.className='btn small'; edit.textContent='Edit';
+    edit.addEventListener('click', ()=> {
+      const newText = prompt('Edit task', t.text);
+      if(newText!=null){ t.text = newText.trim(); save(); renderTodos(); }
+    });
+    const del = document.createElement('button'); del.className='btn ghost small'; del.textContent='Del';
+    del.addEventListener('click', ()=>{
+      const copy = JSON.parse(JSON.stringify(t));
+      pushUndo({type:'delete-todo', label:'Task deleted — undo?', item:copy, index:idx});
+      state.todos = state.todos.filter(x=>x!==t); save(); renderTodos(); updateStatsUI();
+    });
+    right.appendChild(edit); right.appendChild(del);
+
+    item.appendChild(chk); item.appendChild(content); item.appendChild(right);
+    item.addEventListener('dragstart', (e)=>{ e.dataTransfer.setData('text/index', idx); item.style.opacity='0.6'; });
+    item.addEventListener('dragend', ()=> item.style.opacity='1');
+    item.addEventListener('dragover', (e)=> e.preventDefault());
+    item.addEventListener('drop', (e)=> {
+      e.preventDefault();
+      const from = parseInt(e.dataTransfer.getData('text/index'),10);
+      const to = idx;
+      if(from===to) return;
+      const moved = state.todos.splice(from,1)[0];
+      state.todos.splice(to,0,moved);
+      save(); renderTodos();
+    });
+
+    todoList.appendChild(item);
+  });
+}
+renderTodos();
+
+if($('#todo-add')) $('#todo-add').addEventListener('click', ()=>{
+  const v = $('#todo-input').value.trim(); if(!v) return;
+  const proj = $('#todo-project').value;
+  state.todos.unshift({text:v, note:'', project:proj, done:false, created:nowISO()});
+  $('#todo-input').value=''; save(); renderTodos(); updateStatsUI();
+});
+if($('#todo-input')) $('#todo-input').addEventListener('keydown', (e)=>{ if(e.key==='Enter') $('#todo-add').click(); });
+
+if($('#filter-all')) $('#filter-all').addEventListener('click', ()=>{ filterMode='all'; renderTodos(); });
+if($('#filter-pending')) $('#filter-pending').addEventListener('click', ()=>{ filterMode='pending'; renderTodos(); });
+if($('#filter-done')) $('#filter-done').addEventListener('click', ()=>{ filterMode='done'; renderTodos(); });
+if($('#clear-done')) $('#clear-done').addEventListener('click', ()=>{ 
+  const prev = JSON.parse(JSON.stringify(state.todos));
+  pushUndo({type:'clear-done', label:'Cleared done — undo?', prev});
+  state.todos = state.todos.filter(t=>!t.done); save(); renderTodos(); updateStatsUI(); 
+});
+if($('#export-tasks')) $('#export-tasks').addEventListener('click', ()=> {
+  const blob = new Blob([JSON.stringify(state.todos, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tasks.json'; a.click();
+});
+
+/* =========================
+   Picker (weighted) & history
+   ========================= */
+function renderPicker(){
+  const chips = $('#picker-chips'); if(!chips) return;
+  chips.innerHTML='';
+  state.picker.items.forEach((it, idx)=>{
+    const el = document.createElement('div'); el.className='chip'; el.textContent = it.text + (it.w>1 ? (' ×'+it.w) : '');
+    el.addEventListener('click', ()=>{ state.picker.items.splice(idx,1); save(); renderPicker(); });
+    chips.appendChild(el);
+  });
+}
+renderPicker();
+
+if($('#picker-add')) $('#picker-add').addEventListener('click', ()=>{
+  const input = $('#picker-input');
+  const winput = $('#picker-weight');
+  const text = input ? input.value.trim() : '';
+  const w = Math.max(1, parseInt(winput ? winput.value||'1' : '1',10));
+  if(!text) return;
+  state.picker.items.push({text, w}); if(input) input.value=''; if(winput) winput.value='';
+  save(); renderPicker();
+});
+if($('#picker-clear')) $('#picker-clear').addEventListener('click', ()=> { state.picker.items = []; state.picker.history = []; save(); renderPicker(); if($('#picker-result')) $('#picker-result').textContent=''; if($('#picker-history-count')) $('#picker-history-count').textContent='0'; });
+
+if($('#picker-run')) $('#picker-run').addEventListener('click', ()=>{
+  if(!state.picker.items || state.picker.items.length===0){ if($('#picker-result')) $('#picker-result').textContent='(no items)'; return; }
+  const pool = [];
+  state.picker.items.forEach(it => { for(let i=0;i<it.w;i++) pool.push(it.text); });
+  const choice = pool[Math.floor(Math.random()*pool.length)];
+  if($('#picker-result')) $('#picker-result').textContent = choice;
+  state.picker.history = state.picker.history || [];
+  state.picker.history.unshift({choice, when: nowISO()});
+  if(state.picker.history.length>30) state.picker.history.pop();
+  save();
+  renderPicker();
+  if($('#picker-history-count')) $('#picker-history-count').textContent = state.picker.history.length;
+  confettiBrief(); beep(660,0.08);
+});
+
+/* =========================
+   Mood tracker + journal
+   ========================= */
+function renderMood(){
+  const out = $('#mood-history'); if(!out) return; out.innerHTML='';
+  const rows = state.mood.slice().reverse();
+  rows.forEach(m=>{
+    const r = document.createElement('div'); r.style.display='flex'; r.style.justifyContent='space-between'; r.style.alignItems='center';
+    r.style.padding='6px 8px'; r.style.borderRadius='8px'; r.style.background='rgba(255,255,255,0.02)';
+    const left = document.createElement('div'); left.style.display='flex'; left.style.alignItems='center'; left.style.gap='8px';
+    const emoji = document.createElement('div'); emoji.style.fontSize='20px'; emoji.textContent = m.emoji;
+    const col = document.createElement('div'); const label = document.createElement('div'); label.textContent = m.label; label.style.fontWeight='700';
+    const note = document.createElement('div'); note.textContent = m.note || ''; note.style.fontSize='13px'; note.style.color='var(--muted)';
+    col.appendChild(label); if(m.note) col.appendChild(note);
+    left.appendChild(emoji); left.appendChild(col);
+    const date = document.createElement('div'); date.style.color='var(--muted)'; date.style.fontSize='12px'; date.textContent = new Date(m.when).toLocaleString();
+    r.appendChild(left); r.appendChild(date); out.appendChild(r);
+  });
+}
+renderMood();
+
+$$('.mood').forEach(b=>{
+  b.addEventListener('click', async ()=>{
+    $$('.mood').forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected'); setTimeout(()=>b.classList.remove('selected'),350);
+    const emoji = b.textContent; const label = b.dataset.mood;
+    const note = prompt('Add a short note (optional):','');
+    state.mood.push({emoji,label,note,when: nowISO()});
+    if(state.mood.length>200) state.mood.shift();
+    save(); renderMood();
+    beep(660,0.06);
+    if(state.settings.notif) new Notification('Mood logged', {body: label});
+  });
+});
+
+/* =========================
+   Habits & Streaks
+   ========================= */
+function renderHabits(){
+  const el = $('#habit-list'); if(!el) return; el.innerHTML='';
+  state.habits.forEach((h, idx)=>{
+    const row = document.createElement('div'); row.style.display='flex'; row.style.justifyContent='space-between'; row.style.alignItems='center';
+    row.style.padding='8px'; row.style.borderRadius='8px'; row.style.background='rgba(255,255,255,0.01)'; row.style.marginBottom='8px';
+    const left = document.createElement('div'); left.style.display='flex'; left.style.flexDirection='column';
+    const title = document.createElement('div'); title.textContent = h.text; title.style.fontWeight='700';
+    const meta = document.createElement('div'); meta.className='small-muted'; meta.textContent = 'Streak: '+(h.streak||0) + (h.last && h.last.slice(0,10)===new Date().toISOString().slice(0,10) ? ' • Today ✓' : '');
+    left.appendChild(title); left.appendChild(meta);
+    const right = document.createElement('div'); right.style.display='flex'; right.style.gap='6px';
+    const doneBtn = document.createElement('button'); doneBtn.className='btn small'; doneBtn.textContent='Done';
+    doneBtn.addEventListener('click', ()=> {
+      const today = new Date().toISOString().slice(0,10);
+      if(h.last === today){ alert('Already marked today'); return; }
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+      if(h.last === yesterday) h.streak = (h.streak || 0) + 1; else h.streak = 1;
+      h.last = today; save(); renderHabits(); updateStatsUI();
+      confettiBrief(); beep(880,0.06);
+    });
+    const del = document.createElement('button'); del.className='btn ghost small'; del.textContent='Del';
+    del.addEventListener('click', ()=> { state.habits.splice(idx,1); save(); renderHabits(); });
+    right.appendChild(doneBtn); right.appendChild(del);
+    row.appendChild(left); row.appendChild(right);
+    el.appendChild(row);
+  });
+  const hs = state.habits.reduce((a,b)=>a + (b.streak||0),0) || 0;
+  if($('#habit-streak')) $('#habit-streak').textContent = hs;
+}
+renderHabits();
+if($('#habit-add')) $('#habit-add').addEventListener('click', ()=> {
+  const t = $('#habit-input').value.trim(); if(!t) return; state.habits.push({text:t, streak:0, last:null}); $('#habit-input').value=''; save(); renderHabits();
+});
+
+/* =========================
+   Export / Import / Snapshot
+   ========================= */
+function downloadJSON(obj, name='lifehelper.json'){
+  const blob = new Blob([JSON.stringify(obj, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+}
+if($('#export-btn')) $('#export-btn').addEventListener('click', ()=> downloadJSON(state, 'lifehelper-export.json'));
+if($('#export-full')) $('#export-full').addEventListener('click', ()=> downloadJSON(state, 'lifehelper-full.json'));
+if($('#import-btn')) $('#import-btn').addEventListener('click', ()=> {
+  const input = document.createElement('input'); input.type='file'; input.accept='application/json';
+  input.addEventListener('change', (e)=>{
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader(); reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        state = Object.assign(state, data);
+        save(); location.reload();
+      } catch(e){ alert('Invalid JSON'); }
+    }; reader.readAsText(file);
+  });
+  input.click();
+});
+if($('#make-snapshot')) $('#make-snapshot').addEventListener('click', ()=>{
+  const snapshot = btoa(unescape(encodeURIComponent(JSON.stringify({
+    created: nowISO(),
+    todos: state.todos.slice(0,20),
+    picker: state.picker.items.slice(0,10),
+    moods: state.mood.slice(-10)
+  }))));
+  const url = location.href.split('#')[0] + '#snapshot=' + snapshot;
+  navigator.clipboard?.writeText(url).then(()=> alert('Snapshot copied to clipboard'));
+});
+
+/* =========================
+   Clear / Erase (with undo)
+   ========================= */
+if($('#clear-all')) $('#clear-all').addEventListener('click', ()=> {
+  if(confirm('Erase all local data? This cannot be undone.')){ 
+    const prevState = JSON.parse(JSON.stringify(state));
+    pushUndo({type:'clear-all', label:'Cleared all data — undo?', prevState});
+    localStorage.removeItem(STORAGE_KEY); location.reload(); 
+  }
+});
+if($('#erase-local')) $('#erase-local').addEventListener('click', ()=> { if($('#clear-all')) $('#clear-all').click(); });
+
+/* =========================
+   Settings toggles
+   ========================= */
+if($('#sound-toggle')) $('#sound-toggle').addEventListener('click', ()=> {
+  state.settings.sound = !state.settings.sound; save();
+  $('#sound-toggle').textContent = 'Sound: ' + (state.settings.sound ? 'On' : 'Off');
+});
+
+/* =========================
+   Help / onboarding
+   ========================= */
+if($('#help')) $('#help').addEventListener('click', ()=> {
+  alert('Life Helper Toolkit — Tips:\n• Use presets to start focus quickly.\n• Mood + note helps track how you felt during sessions.\n• Export before clearing local data.\n• Try the weighted picker for decisions.\n• Press Ctrl/Cmd+K for quick commands.');
+});
+
+/* =========================
+   Analytics sparkline rendering
+   ========================= */
+function renderSparkline(){
+  const svg = $('#sparkline');
+  if(!svg) return;
+  const hist = (state.stats.history || []).slice(-7);
+  const arr = [];
+  for(let i=6;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const key = d.toISOString().slice(0,10);
+    const found = (state.stats.history||[]).find(h=>h.date===key);
+    arr.push(found ? (found.minutes||0) : 0);
+  }
+  const total = arr.reduce((a,b)=>a+b,0);
+  if($('#spark-total')) $('#spark-total').textContent = total + 'm';
+  const w = 140, h = 42;
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  if(arr.length===0){ svg.innerHTML = ''; return; }
+  const max = Math.max(...arr, 1);
+  const stepX = w / (arr.length - 1 || 1);
+  let d = '';
+  arr.forEach((v,i)=>{
+    const x = Math.round(i * stepX);
+    const y = Math.round(h - (v / max) * (h - 6));
+    d += (i===0?`M ${x} ${y}` : ` L ${x} ${y}`);
+  });
+  svg.innerHTML = `<path d="${d}" fill="none" stroke="url(#g1)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>
+  <defs>
+    <linearGradient id="g1" x1="0" x2="1">
+      <stop offset="0" stop-color="#6ee7b7"/>
+      <stop offset="1" stop-color="#60a5fa"/>
+    </linearGradient>
+  </defs>`;
+}
+renderSparkline();
+
+/* =========================
+   Small UI updates / stats
+   ========================= */
+function updateStatsUI(){
+  if($('#stat-sessions')) $('#stat-sessions').textContent = state.timer.sessions || 0;
+  if($('#stat-minutes')) $('#stat-minutes').textContent = state.stats.totalMinutes || 0;
+  if($('#stat-tasks')) $('#stat-tasks').textContent = (state.todos.filter(t=>t.done)).length;
+  if($('#badges')) $('#badges').innerHTML = (state.badges || []).map(b=>'<span class="badge">'+b+'</span>').join(' ');
+  renderSparkline();
+}
+updateStatsUI();
+
+/* =========================
+   Keyboard shortcuts, Command Palette
+   ========================= */
+const cmdPalette = $('#cmd-palette'), cmdInput = $('#cmd-input'), cmdList = $('#cmd-list');
+const commands = [
+  {id:'start-25', title:'Start 25m Pomodoro', action:()=>{ state.timer.remaining = 25*60; state.timer.mode='pomodoro'; startTimer(); renderTimer(); }},
+  {id:'start-50', title:'Start 50m Sprint', action:()=>{ state.timer.remaining = 50*60; state.timer.mode='pomodoro'; startTimer(); renderTimer(); }},
+  {id:'add-todo', title:'Add To-Do (open input)', action:()=>{ const ti = $('input#todo-input'); if(ti) ti.focus(); }},
+  {id:'go-mood', title:'Open Mood panel', action:()=>{ $$(`.tab`).forEach(t=>t.classList.remove('active')); $(`.tab[data-panel="mood"]`).classList.add('active'); $$('.panel-item').forEach(p=>{ p.style.display = (p.id==='mood') ? '' : 'none'; }); }},
+  {id:'toggle-sound', title:'Toggle sound', action:()=>{ state.settings.sound = !state.settings.sound; if($('#sound-toggle')) $('#sound-toggle').textContent = 'Sound: ' + (state.settings.sound ? 'On' : 'Off'); save(); }},
+  {id:'export', title:'Export data', action:()=> downloadJSON(state, 'lifehelper-export.json')},
+];
+let cmdMatches = [...commands];
+function openCmd(){ if(!cmdPalette) return; cmdPalette.style.display='flex'; if(cmdInput){ cmdInput.value=''; cmdInput.focus(); } renderCmdList(); }
+function closeCmd(){ if(!cmdPalette) return; cmdPalette.style.display='none'; if(cmdList) cmdList.innerHTML=''; }
+function renderCmdList(){
+  if(!cmdList) return;
+  const q = cmdInput ? cmdInput.value.trim().toLowerCase() : '';
+  cmdMatches = commands.filter(c => c.title.toLowerCase().includes(q));
+  cmdList.innerHTML = '';
+  cmdMatches.forEach(c=>{
+    const el = document.createElement('div'); el.className='cmd-item'; el.textContent = c.title;
+    el.addEventListener('click', ()=> { c.action(); closeCmd(); });
+    cmdList.appendChild(el);
+  });
+}
+if(cmdInput) cmdInput.addEventListener('input', renderCmdList);
+document.addEventListener('keydown', (e)=>{
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); openCmd(); }
+  if(e.key === 'Escape'){ 
+    if(cmdPalette && cmdPalette.style.display === 'flex'){ closeCmd(); return; }
+    pauseTimer(); swStopFn();
+  }
+  if((e.key===' ' || e.key==='Enter') && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA'){
+    if(state.timer.running) pauseTimer(); else startTimer();
+  }
+});
+document.addEventListener('click', (e)=>{ if(cmdPalette && cmdPalette.style.display==='flex' && !cmdPalette.contains(e.target) && e.target.id !== 'cmd-input'){ closeCmd(); } });
+
+/* =========================
+   Save state periodically
+   ========================= */
+setInterval(()=> save(), 2000);
+
+/* =========================
+   Init render
+   ========================= */
+function init(){
+  renderTodos(); renderPicker(); renderMood(); renderHabits(); updateStatsUI();
+  if(state.timer.running) { const md = $('#mini-timer'); if(md) md.style.display=''; }
+}
+init();
+
+/* =========================
+   First-run onboarding example data
+   ========================= */
+if(!localStorage.getItem(STORAGE_KEY)){
+  state.todos = [{text:'Try Study 25/5', project:'inbox', done:false, created:nowISO()}];
+  state.badges = ['Welcome'];
+  save();
+}
+
+/* =========================
+   End of DOMContentLoaded
+   ========================= */
+}); // DOMContentLoaded
+</script>
+</body>
+</html>
